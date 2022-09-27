@@ -32,16 +32,7 @@ pub fn get_local() -> Option<RequestModel> {
     let request_model = req.lock().unwrap();
     match request_model.get() {
         None => None,
-        Some(e) => {
-            let mut model = RequestModel::default();
-            model.set_uid(e.uid().clone());
-            model.set_agency_code(e.agency_code().clone());
-            model.set_super_admin(e.super_admin().clone());
-            model.set_username(e.username().clone());
-            model.set_path(e.path().clone());
-            model.set_from(e.from().clone());
-            Some(model)
-        }
+        Some(e) => Some(e.clone()),
     }
 }
 
