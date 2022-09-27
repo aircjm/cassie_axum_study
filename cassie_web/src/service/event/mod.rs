@@ -47,10 +47,11 @@ pub async fn consume_script(worker: &mut MainWorker, custom: CustomEvent) {
     let event_config_service = APPLICATION_CONTEXT.get::<EventConfigService>();
     //获取到所有的事件配置
     let list = load_event().await;
+    let model = custom.request_model.clone().unwrap();
     if let Ok(data) = list {
         let d = data
             .iter()
-            .filter(|item| key_match2(&custom.path.clone().as_str(), &item.path().clone().unwrap()) || item.path().clone().unwrap().contains(&custom.path.clone()))
+            .filter(|item| key_match2(&model.path().as_str(), &item.path().clone().unwrap()) || item.path().clone().unwrap().contains(&model.path().clone()))
             .collect::<Vec<_>>();
         info!("事件个数：{:?}", d.len());
         if d.len() > 0 {

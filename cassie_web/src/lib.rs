@@ -86,17 +86,11 @@ pub async fn init_context() {
 
 async fn fire_script_event(params_values: HashMap<String, serde_json::Value>, return_values: serde_json::Value) {
     let request = get_local();
-    match request {
-        Some(data) => {
-            let cus = CustomEvent {
-                path: data.path().clone(),
-                params_values: Some(params_values),
-                return_values,
-                request_model: Some(data),
-            };
-            let event = CassieEvent::Custom(cus);
-            fire_event(event).await;
-        }
-        None => {}
-    }
+    let cus = CustomEvent {
+        params_values: Some(params_values),
+        return_values,
+        request_model: request,
+    };
+    let event = CassieEvent::Custom(cus);
+    fire_event(event).await;
 }

@@ -12,7 +12,6 @@ pub async fn run(Json(arg): Json<HashMap<String, String>>) -> impl IntoResponse 
     clear_msg();
     let request = get_local().unwrap();
     let cus = CustomEvent {
-        path: request.path().clone(),
         params_values: None,
         return_values: serde_json::Value::Null,
         request_model: Some(request),
