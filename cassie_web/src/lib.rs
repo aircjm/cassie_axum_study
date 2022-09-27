@@ -60,6 +60,7 @@ CasbinService 权限服务
 pub static APPLICATION_CONTEXT: Container![Send + Sync] = <Container![Send + Sync]>::new();
 /*初始化环境上下文*/
 pub async fn init_context() {
+    print_banner();
     //第一步加载配置
     init_config().await;
     init_log();
@@ -93,4 +94,16 @@ async fn fire_script_event(params_values: HashMap<String, serde_json::Value>, re
     };
     let event = CassieEvent::Custom(cus);
     fire_event(event).await;
+}
+fn print_banner() {
+    let banner = r#"
+  _____              _                                                     _           _       
+ / ____|            (_)          /\                               /\      | |         (_)      
+| |     __ _ ___ ___ _  ___     /  \   __  ___   _ _ __ ___      /  \   __| |_ __ ___  _ _ __  
+| |    / _` / __/ __| |/ _ \   / /\ \  \ \/ / | | | '_ ` _ \    / /\ \ / _` | '_ ` _ \| | '_ \ 
+| |___| (_| \__ \__ \ |  __/  / ____ \  >  <| |_| | | | | | |  / ____ \ (_| | | | | | | | | | |
+ \_____\__,_|___/___/_|\___| /_/    \_\/_/\_\\__,_|_| |_| |_| /_/    \_\__,_|_| |_| |_|_|_| |_|
+
+    "#;
+    println!("{}", banner);
 }
