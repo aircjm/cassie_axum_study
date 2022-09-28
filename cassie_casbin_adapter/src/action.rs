@@ -59,7 +59,10 @@ impl CICICasinService {
             .map_err(|e| casbin::error::Error::IoError(e.into()));
         list
     }
-    pub(crate) async fn load_filtered_policy<'a>(&self, filter_x: &Filter<'_>) -> Result<Vec<CasbinRule>> {
+    pub(crate) async fn load_filtered_policy<'a>(
+        &self,
+        filter_x: &Filter<'_>,
+    ) -> Result<Vec<CasbinRule>> {
         let (g_filter, p_filter) = filtered_where_values(filter_x);
         let mut result = Vec::new();
         let gwrapper = self
@@ -73,7 +76,10 @@ impl CICICasinService {
             .eq(CasbinRule::v4(), g_filter[4])
             .eq(CasbinRule::v5(), g_filter[5]);
 
-        let glist = self.rbatis.fetch_list_by_wrapper::<CasbinRule>(gwrapper).await;
+        let glist = self
+            .rbatis
+            .fetch_list_by_wrapper::<CasbinRule>(gwrapper)
+            .await;
         if let Ok(l) = glist {
             for p in l {
                 result.push(p);
@@ -89,7 +95,10 @@ impl CICICasinService {
             .eq(CasbinRule::v3(), p_filter[3])
             .eq(CasbinRule::v4(), p_filter[4])
             .eq(CasbinRule::v5(), p_filter[5]);
-        let plist = self.rbatis.fetch_list_by_wrapper::<CasbinRule>(pwrapper).await;
+        let plist = self
+            .rbatis
+            .fetch_list_by_wrapper::<CasbinRule>(pwrapper)
+            .await;
         if let Ok(l) = plist {
             for p in l {
                 result.push(p);
@@ -136,7 +145,8 @@ impl CICICasinService {
                 v4: v4.to_string(),
                 v5: v5.to_string(),
             };
-            tx.save::<CasbinRule>(&e, &[Skip::Column(CasbinRule::id())]).await;
+            tx.save::<CasbinRule>(&e, &[Skip::Column(CasbinRule::id())])
+                .await;
         }
         tx.commit().await.unwrap();
         println!("保存策略!!!!!!!!!!!!!!!");
@@ -149,7 +159,9 @@ impl CICICasinService {
      *email:348040933@qq.com
      */
     pub(crate) async fn clear_policy(&self) -> Result<()> {
-        self.rbatis.remove_by_wrapper::<CasbinRule>(self.rbatis.new_wrapper()).await;
+        self.rbatis
+            .remove_by_wrapper::<CasbinRule>(self.rbatis.new_wrapper())
+            .await;
         Ok(())
     }
     /**
@@ -196,7 +208,12 @@ impl CICICasinService {
         Ok(true)
     }
     ///  删除筛选的策略
-    pub async fn remove_filtered_policy(&self, pt: &str, field_index: usize, field_values: Vec<String>) -> Result<bool> {
+    pub async fn remove_filtered_policy(
+        &self,
+        pt: &str,
+        field_index: usize,
+        field_values: Vec<String>,
+    ) -> Result<bool> {
         let field_values_x = normalize_casbin_rule(field_values, field_index);
         let mut wrapper = self.rbatis.new_wrapper().eq(CasbinRule::ptype(), pt);
         match field_index {

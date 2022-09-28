@@ -41,7 +41,11 @@ where
             //拿到返回值
             let response: Response = future.await?;
             //判断请求返回是不是成功
-            let status = if response.status().is_success() { Some(1) } else { Some(0) };
+            let status = if response.status().is_success() {
+                Some(1)
+            } else {
+                Some(0)
+            };
             //构建操作日志event对象
             let mut operation = SysLogOperationDto::default();
             operation.set_operation(Some(action.clone()));

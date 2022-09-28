@@ -12,7 +12,8 @@ use std::sync::{Arc, Mutex};
 use thread_local::ThreadLocal;
 
 lazy_static! {
-    static ref REQUEST_CONTEXT: Arc<Mutex<ThreadLocal<RequestModel>>> = Arc::new(Mutex::new(ThreadLocal::new()));
+    static ref REQUEST_CONTEXT: Arc<Mutex<ThreadLocal<RequestModel>>> =
+        Arc::new(Mutex::new(ThreadLocal::new()));
 }
 /**
  *method:checked_token

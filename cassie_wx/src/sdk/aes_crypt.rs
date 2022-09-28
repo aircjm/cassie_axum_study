@@ -25,13 +25,15 @@ impl AesCrypt {
             key_size = aes::KeySize::KeySize256;
             key = _key[0..32].to_vec();
         }
-        AesCrypt { key: key, iv: iv, key_size: key_size }
+        AesCrypt { key, iv, key_size }
     }
 
     /// 针对字符串进行加密
     pub fn encrypt(&self, text: String) -> String {
         // aes 加密
-        let encrypted_data = aes_cbc_encrypt(self.key_size, text.as_bytes(), &self.key, &self.iv).ok().unwrap();
+        let encrypted_data = aes_cbc_encrypt(self.key_size, text.as_bytes(), &self.key, &self.iv)
+            .ok()
+            .unwrap();
         // 编码成base64
         let mut base64_encode = String::new();
         base64::encode_config_buf(&encrypted_data, base64::STANDARD, &mut base64_encode);
@@ -42,7 +44,9 @@ impl AesCrypt {
     /// param1: 需要进行加密的文本信息
     pub fn encrypt_byte(&self, text: Vec<u8>) -> String {
         // aes 加密
-        let encrypted_data = aes_cbc_encrypt(self.key_size, &text, &self.key, &self.iv).ok().unwrap();
+        let encrypted_data = aes_cbc_encrypt(self.key_size, &text, &self.key, &self.iv)
+            .ok()
+            .unwrap();
         // 编码成base64
         let mut base64_encode = String::new();
         base64::encode_config_buf(&encrypted_data, base64::STANDARD, &mut base64_encode);
@@ -64,13 +68,14 @@ impl AesCrypt {
         };
         // println!("=== msg de text===={:?}", base64_decode);
         // aes 解码
-        let decrypted_data = match aes_cbc_decrypt(self.key_size, &base64_decode[..], &self.key, &self.iv) {
-            Ok(data) => data,
-            Err(_e) => {
-                println!("base64_decode={:?}", _e);
-                return "".to_owned();
-            }
-        };
+        let decrypted_data =
+            match aes_cbc_decrypt(self.key_size, &base64_decode[..], &self.key, &self.iv) {
+                Ok(data) => data,
+                Err(_e) => {
+                    println!("base64_decode={:?}", _e);
+                    return "".to_owned();
+                }
+            };
 
         // 转换成string
         let the_string = str::from_utf8(&decrypted_data).expect("not UTF-8");
@@ -80,7 +85,12 @@ impl AesCrypt {
 }
 
 /// Encrypt a buffer with the given key and iv using AES-256/CBC/Pkcs encryption.
-fn aes_cbc_encrypt(key_size: aes::KeySize, data: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>, symmetriccipher::SymmetricCipherError> {
+fn aes_cbc_encrypt(
+    key_size: aes::KeySize,
+    data: &[u8],
+    key: &[u8],
+    iv: &[u8],
+) -> Result<Vec<u8>, symmetriccipher::SymmetricCipherError> {
     let mut encryptor = aes::cbc_encryptor(key_size, key, iv, blockmodes::PkcsPadding);
 
     let mut final_result = Vec::<u8>::new();
@@ -91,7 +101,13 @@ fn aes_cbc_encrypt(key_size: aes::KeySize, data: &[u8], key: &[u8], iv: &[u8]) -
     loop {
         let result = (encryptor.encrypt(&mut read_buffer, &mut write_buffer, true))?;
 
-        final_result.extend(write_buffer.take_read_buffer().take_remaining().iter().map(|&i| i));
+        final_result.extend(
+            write_buffer
+                .take_read_buffer()
+                .take_remaining()
+                .iter()
+                .map(|&i| i),
+        );
 
         match result {
             BufferResult::BufferUnderflow => break,
@@ -104,7 +120,12 @@ fn aes_cbc_encrypt(key_size: aes::KeySize, data: &[u8], key: &[u8], iv: &[u8]) -
 /// Decrypts a buffer with the given key and iv using AES-256/CBC/Pkcs encryption.
 /// @param1: key大小
 /// @param2: 加密数据
-fn aes_cbc_decrypt(key_size: aes::KeySize, encrypted_data: &[u8], key: &[u8], iv: &[u8]) -> Result<Vec<u8>, symmetriccipher::SymmetricCipherError> {
+fn aes_cbc_decrypt(
+    key_size: aes::KeySize,
+    encrypted_data: &[u8],
+    key: &[u8],
+    iv: &[u8],
+) -> Result<Vec<u8>, symmetriccipher::SymmetricCipherError> {
     let mut decryptor = aes::cbc_decryptor(key_size, key, iv, blockmodes::PkcsPadding);
 
     let mut final_result = Vec::<u8>::new();
@@ -114,7 +135,13 @@ fn aes_cbc_decrypt(key_size: aes::KeySize, encrypted_data: &[u8], key: &[u8], iv
     // println!("=== decrypt key {:?} ", key);
     loop {
         let result = (decryptor.decrypt(&mut read_buffer, &mut write_buffer, true))?;
-        final_result.extend(write_buffer.take_read_buffer().take_remaining().iter().map(|&i| i));
+        final_result.extend(
+            write_buffer
+                .take_read_buffer()
+                .take_remaining()
+                .iter()
+                .map(|&i| i),
+        );
         match result {
             BufferResult::BufferUnderflow => break,
             BufferResult::BufferOverflow => {}

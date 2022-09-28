@@ -12,7 +12,10 @@ pub struct Client {
 impl Client {
     pub fn new() -> Self {
         let mut headers = header::HeaderMap::new();
-        headers.insert(header::USER_AGENT, header::HeaderValue::from_static(DEFAULT_USER_AGENT));
+        headers.insert(
+            header::USER_AGENT,
+            header::HeaderValue::from_static(DEFAULT_USER_AGENT),
+        );
 
         Client {
             client: HttpClient::builder()

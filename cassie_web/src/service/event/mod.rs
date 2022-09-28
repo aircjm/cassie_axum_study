@@ -51,7 +51,10 @@ pub async fn consume_script(worker: &mut MainWorker, custom: CustomEvent) {
     if let Ok(data) = list {
         let d = data
             .iter()
-            .filter(|item| key_match2(&model.path().as_str(), &item.path().clone().unwrap()) || item.path().clone().unwrap().contains(&model.path().clone()))
+            .filter(|item| {
+                key_match2(&model.path().as_str(), &item.path().clone().unwrap())
+                    || item.path().clone().unwrap().contains(&model.path().clone())
+            })
             .collect::<Vec<_>>();
         info!("事件个数：{:?}", d.len());
         if d.len() > 0 {
@@ -61,17 +64,28 @@ pub async fn consume_script(worker: &mut MainWorker, custom: CustomEvent) {
 }
 
 //核心动态脚本执行方法
-async fn execute_script(workers: &mut MainWorker, data: Vec<&EventConfigDTO>, custom: &CustomEvent) {
+async fn execute_script(
+    workers: &mut MainWorker,
+    data: Vec<&EventConfigDTO>,
+    custom: &CustomEvent,
+) {
     let start = Instant::now();
     let init_code = format!(r#" var request_context={};"#, custom.as_json());
     for event in data {
-        let code = build_script(init_code.clone(), event.event_script().clone().unwrap().clone());
+        let code = build_script(
+            init_code.clone(),
+            event.event_script().clone().unwrap().clone(),
+        );
         //如果错误需要重试
         let result = retry_with_index(Fixed::from_millis(100), |current_try| {
             if current_try > event.need_persist().unwrap() {
                 return OperationResult::Err(format!("超过重试次数：{}", current_try));
             }
-            match do_execute_script(workers, event.event_name().clone().unwrap().as_str(), code.as_str()) {
+            match do_execute_script(
+                workers,
+                event.event_name().clone().unwrap().as_str(),
+                code.as_str(),
+            ) {
                 Ok(result) => OperationResult::Ok(result),
                 Err(e) => OperationResult::Retry(e.to_string()),
             }
@@ -80,11 +94,18 @@ async fn execute_script(workers: &mut MainWorker, data: Vec<&EventConfigDTO>, cu
     }
 
     workers.run_event_loop(false).await;
-    info!("execute script time {} 毫秒", start.elapsed().as_millis().to_string());
+    info!(
+        "execute script time {} 毫秒",
+        start.elapsed().as_millis().to_string()
+    );
 }
 
 //处理结果集  event 事件  custom参数
-fn handle_result(result: Result<serde_json::Value, Error<String>>, event: EventConfigDTO, custom: CustomEvent) {
+fn handle_result(
+    result: Result<serde_json::Value, Error<String>>,
+    event: EventConfigDTO,
+    custom: CustomEvent,
+) {
     match result {
         Ok(data) => {
             //处理结果 由于是异步处理处理结果可以放到数据库里
@@ -95,7 +116,11 @@ fn handle_result(result: Result<serde_json::Value, Error<String>>, event: EventC
     }
 }
 //执行脚本 并处理结果集
-fn do_execute_script(workers: &mut MainWorker, name: &str, source_code: &str) -> Result<serde_json::Value, String> {
+fn do_execute_script(
+    workers: &mut MainWorker,
+    name: &str,
+    source_code: &str,
+) -> Result<serde_json::Value, String> {
     match workers.js_runtime.execute_script(name, source_code) {
         Ok(global) => {
             //处理结果集

@@ -6,7 +6,9 @@ use crate::APPLICATION_CONTEXT;
 use casbin::MgmtApi;
 use cassie_domain::entity::sys_entitys::CommonField;
 use cassie_domain::request::SysMenuQuery;
-use cassie_domain::{dto::sys_role_dto::SysRoleMenuDTO, entity::sys_entitys::SysRoleMenu, request::SysRoleQuery};
+use cassie_domain::{
+    dto::sys_role_dto::SysRoleMenuDTO, entity::sys_entitys::SysRoleMenu, request::SysRoleQuery,
+};
 use cassie_orm::dao::mapper::get_menu_list_by_ids;
 use rbatis::rbatis::Rbatis;
 use rbatis::{crud::CRUD, DateTimeNative};
@@ -34,7 +36,10 @@ impl SysRoleMenuService {
 
         //将Entity实体转换成 Vo对象 返回
         if let Ok(ls) = list {
-            return ls.iter().map(|f| f.menu_id.clone().unwrap_or_default()).collect::<Vec<i64>>();
+            return ls
+                .iter()
+                .map(|f| f.menu_id.clone().unwrap_or_default())
+                .collect::<Vec<i64>>();
         } else {
             return Vec::<i64>::new();
         }
@@ -49,7 +54,9 @@ impl SysRoleMenuService {
         let request_model = get_local().unwrap();
         let rb = APPLICATION_CONTEXT.get::<Rbatis>();
         let sys_menu_service = APPLICATION_CONTEXT.get::<SysMenuService>();
-        let r_list = get_menu_list_by_ids(&mut rb.as_executor(), &menu_id_list.clone().unwrap()).await.unwrap();
+        let r_list = get_menu_list_by_ids(&mut rb.as_executor(), &menu_id_list.clone().unwrap())
+            .await
+            .unwrap();
         let menus = sys_menu_service.list(&query).await;
         let mut rules = vec![];
         let mut vec = Vec::new();
@@ -85,15 +92,21 @@ impl SysRoleMenuService {
     //删除角色与菜单的关系
     pub async fn delete_by_role_id(&self, role_id: i64) {
         let request_model = get_local().unwrap();
-        self.del_by_column(SysRoleMenu::role_id(), &role_id.to_string()).await;
+        self.del_by_column(SysRoleMenu::role_id(), &role_id.to_string())
+            .await;
         let cached_enforcer = APPLICATION_CONTEXT.get::<CasbinService>().enforcer.clone();
         let mut lock = cached_enforcer.write().await;
-        lock.remove_named_policy("p", vec![role_id.to_string(), request_model.agency_code().clone()]).await;
+        lock.remove_named_policy(
+            "p",
+            vec![role_id.to_string(), request_model.agency_code().clone()],
+        )
+        .await;
         drop(lock);
     }
     //批量删除
     pub async fn delete_by_menu_id(&self, menu_id: i64) {
-        self.del_by_column(SysRoleMenu::menu_id(), &menu_id.to_string()).await;
+        self.del_by_column(SysRoleMenu::menu_id(), &menu_id.to_string())
+            .await;
     }
 }
 

@@ -4,14 +4,23 @@ use log::info;
 use percent_encoding::{utf8_percent_encode, AsciiSet, CONTROLS};
 use tokio::time;
 
-const FRAGMENT: &AsciiSet = &CONTROLS.add(b' ').add(b'"').add(b'{').add(b'}').add(b':').add(b',');
+const FRAGMENT: &AsciiSet = &CONTROLS
+    .add(b' ')
+    .add(b'"')
+    .add(b'{')
+    .add(b'}')
+    .add(b':')
+    .add(b',');
 
 //nacos服务注册
 pub async fn register_service() {
     let cassie_config = APPLICATION_CONTEXT.get::<ApplicationConfig>();
     //如果开启了nacos注册，则注册服务
     if cassie_config.nacos().nacos_flag().clone() {
-        info!("register service: {:?}", cassie_config.nacos().nacos_server());
+        info!(
+            "register service: {:?}",
+            cassie_config.nacos().nacos_server()
+        );
         let client = reqwest::Client::new();
         let body = client
             .post(

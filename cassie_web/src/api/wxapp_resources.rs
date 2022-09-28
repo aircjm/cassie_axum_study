@@ -39,7 +39,8 @@ pub async fn mp_auth(Json(sign): Json<WxSignInVo>) -> impl IntoResponse {
                     return RespVO::from(&result).resp_json();
                 }
                 Err(_) => {
-                    return RespVO::<()>::from_error(&Error::from("获取用户访问token失败")).resp_json();
+                    return RespVO::<()>::from_error(&Error::from("获取用户访问token失败"))
+                        .resp_json();
                 }
             }
         }
@@ -64,5 +65,7 @@ pub async fn notify() {
 }
 
 pub fn init_router() -> Router {
-    Router::new().route("/wechat/mp_auth", post(mp_auth)).route("/wechat/auth_bindind_phone", post(auth_binding_phone))
+    Router::new()
+        .route("/wechat/mp_auth", post(mp_auth))
+        .route("/wechat/auth_bindind_phone", post(auth_binding_phone))
 }

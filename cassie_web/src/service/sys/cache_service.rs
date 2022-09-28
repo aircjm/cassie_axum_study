@@ -56,7 +56,10 @@ impl CacheService {
     {
         let data = serde_json::to_string(v);
         if data.is_err() {
-            return Err(Error::from(format!("MemCacheService set_json fail:{}", data.err().unwrap())));
+            return Err(Error::from(format!(
+                "MemCacheService set_json fail:{}",
+                data.err().unwrap()
+            )));
         }
         let data = self.set_string(k, data.unwrap().as_str()).await?;
         Ok(data)
@@ -72,7 +75,10 @@ impl CacheService {
         }
         let data: serde_json::Result<T> = serde_json::from_str(r.as_str());
         if data.is_err() {
-            return Err(Error::from(format!("MemCacheService GET fail:{}", data.err().unwrap())));
+            return Err(Error::from(format!(
+                "MemCacheService GET fail:{}",
+                data.err().unwrap()
+            )));
         }
         Ok(data.unwrap())
     }

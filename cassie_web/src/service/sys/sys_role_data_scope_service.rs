@@ -2,7 +2,10 @@ use super::crud_service::CrudService;
 use crate::middleware::get_local;
 use crate::APPLICATION_CONTEXT;
 use cassie_domain::entity::sys_entitys::CommonField;
-use cassie_domain::{dto::sys_role_dto::SysRoleDataScopeDTO, entity::sys_entitys::SysRoleDataScope, request::SysRoleQuery};
+use cassie_domain::{
+    dto::sys_role_dto::SysRoleDataScopeDTO, entity::sys_entitys::SysRoleDataScope,
+    request::SysRoleQuery,
+};
 use rbatis::plugin::snowflake::new_snowflake_id;
 use rbatis::rbatis::Rbatis;
 use rbatis::DateTimeNative;
@@ -40,7 +43,8 @@ impl SysRoleDataScopeService {
         }
     }
     pub async fn delete_by_role_id(&self, role_id: i64) {
-        self.del_by_column(SysRoleDataScope::role_id(), &role_id.to_string()).await;
+        self.del_by_column(SysRoleDataScope::role_id(), &role_id.to_string())
+            .await;
     }
 }
 impl CrudService<SysRoleDataScope, SysRoleDataScopeDTO, SysRoleQuery> for SysRoleDataScopeService {

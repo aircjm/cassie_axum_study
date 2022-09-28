@@ -19,7 +19,10 @@ pub async fn login(Json(sign): Json<SignInDTO>) -> impl IntoResponse {
     if let Err(e) = sign.validate() {
         return RespVO::<()>::from_error(&Error::E(e.to_string())).resp_json();
     }
-    if let Ok(code) = cache_service.get_string(&format!("_captch:uuid_{}", &sign.uuid().clone().unwrap())).await {
+    if let Ok(code) = cache_service
+        .get_string(&format!("_captch:uuid_{}", &sign.uuid().clone().unwrap()))
+        .await
+    {
         if !code.eq(&sign.vcode().clone().unwrap()) {
             return RespVO::<()>::from_error(&Error::E("验证码错误".to_string())).resp_json();
         }
@@ -49,7 +52,11 @@ pub async fn captcha_base64(Path(uuid): Path<String>) -> impl IntoResponse {
     };
 
     let res = cache_service
-        .set_string_ex(&format!("_captch:uuid_{}", uuid.clone()), captcha_str.as_str(), Some(std::time::Duration::from_secs(60 * 5)))
+        .set_string_ex(
+            &format!("_captch:uuid_{}", uuid.clone()),
+            captcha_str.as_str(),
+            Some(std::time::Duration::from_secs(60 * 5)),
+        )
         .await;
     println!("{:?}", res);
     return RespVO::from(&png.unwrap()).resp_json();
@@ -74,7 +81,11 @@ pub async fn captcha_png(Path(uuid): Path<String>) -> Response<Body> {
     };
 
     let res = cache_service
-        .set_string_ex(&format!("_captch:uuid_{}", uuid.clone()), captcha_str.as_str(), Some(std::time::Duration::from_secs(60 * 5)))
+        .set_string_ex(
+            &format!("_captch:uuid_{}", uuid.clone()),
+            captcha_str.as_str(),
+            Some(std::time::Duration::from_secs(60 * 5)),
+        )
         .await;
     println!("{:?}", res);
     Response::builder()

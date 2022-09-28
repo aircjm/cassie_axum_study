@@ -40,7 +40,10 @@ pub fn handle_msg(addr: SocketAddr, msg: String) {
                 massage.date = Some(get_date());
                 massage.body = Some(body);
                 // 把消息发送给 非自己的所有用户
-                let broadcast_recipients = peers.iter().filter(|(peer_addr, _)| peer_addr != &&addr).map(|(_, ws_sink)| ws_sink);
+                let broadcast_recipients = peers
+                    .iter()
+                    .filter(|(peer_addr, _)| peer_addr != &&addr)
+                    .map(|(_, ws_sink)| ws_sink);
                 for recp in broadcast_recipients {
                     let m = serde_json::to_string(&massage).unwrap();
                     recp.unbounded_send(Message::from(m)).unwrap();

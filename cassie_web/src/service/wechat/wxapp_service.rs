@@ -26,14 +26,19 @@ pub async fn save_or_update_user(user: WechatUserDTO) -> i64 {
     //判断unionid  存在根据unionid判断
     let mut uid = match user.unionid() {
         Some(unionid) => {
-            let list = wechat_user_service.fetch_list_by_column(WechatUser::unionid(), &vec![unionid.clone()]).await.unwrap();
+            let list = wechat_user_service
+                .fetch_list_by_column(WechatUser::unionid(), &vec![unionid.clone()])
+                .await
+                .unwrap();
             if list.len() > 0 {
                 let mut userinfo = list.get(0).unwrap().clone();
                 let uid = userinfo.id().clone().unwrap();
                 userinfo.set_nickname(user.nickname().clone());
                 userinfo.set_headimgurl(user.headimgurl().clone());
                 //执行更新逻辑
-                wechat_user_service.update_by_id(uid.to_string(), &mut userinfo.into()).await;
+                wechat_user_service
+                    .update_by_id(uid.to_string(), &mut userinfo.into())
+                    .await;
                 uid
             } else {
                 0
@@ -45,12 +50,20 @@ pub async fn save_or_update_user(user: WechatUserDTO) -> i64 {
     if uid == 0 {
         uid = match user.routine_openid() {
             Some(routine_openid) => {
-                let list = wechat_user_service.fetch_list_by_column(WechatUser::routine_openid(), &vec![routine_openid.clone()]).await.unwrap();
+                let list = wechat_user_service
+                    .fetch_list_by_column(
+                        WechatUser::routine_openid(),
+                        &vec![routine_openid.clone()],
+                    )
+                    .await
+                    .unwrap();
                 if list.len() > 0 {
                     let userinfo = list.get(0).unwrap();
                     let uid = userinfo.id().clone().unwrap();
                     //执行更新逻辑
-                    wechat_user_service.update_by_id(uid.to_string(), &mut user.clone().into()).await;
+                    wechat_user_service
+                        .update_by_id(uid.to_string(), &mut user.clone().into())
+                        .await;
                     return uid;
                 }
                 0
@@ -104,22 +117,38 @@ pub async fn wxapp_auth(sign: WxSignInVo) -> Result<i64> {
     //新登录用户
     //如果code存在 session_key不存在 则需要根据code拿到session_key
     if sign.code().is_some() && session_key.is_empty() {
-        match get_session_key(config.wxapp().appid(), config.wxapp().secret(), &sign.code().clone().unwrap()).await {
+        match get_session_key(
+            config.wxapp().appid(),
+            config.wxapp().secret(),
+            &sign.code().clone().unwrap(),
+        )
+        .await
+        {
             Ok(data) => {
                 println!("session:{:?}", data);
                 let data: WxappSessionKey = serde_json::from_value(data).unwrap();
                 session_key = data.session_key.clone();
                 openid = data.openid.clone();
-                unionid = if data.unionid.is_some() { data.unionid.clone().unwrap() } else { "".to_string() };
+                unionid = if data.unionid.is_some() {
+                    data.unionid.clone().unwrap()
+                } else {
+                    "".to_string()
+                };
             }
             Err(e) => {
-                return Err(Error::E("获取session_key失败，请检查您的配置！".to_string()));
+                return Err(Error::E(
+                    "获取session_key失败，请检查您的配置！".to_string(),
+                ));
             }
         };
     }
     wechat_user.set_session_key(Some(session_key.clone()));
     //解密获取 用户信息 组装数据
-    match resolve_data(session_key.clone(), sign.iv().clone().unwrap(), sign.encryptedData().clone().unwrap()) {
+    match resolve_data(
+        session_key.clone(),
+        sign.iv().clone().unwrap(),
+        sign.encryptedData().clone().unwrap(),
+    ) {
         Ok(wx_info) => {
             wechat_user.set_nickname(wx_info.nickName); //昵称
             wechat_user.set_headimgurl(wx_info.avatarUrl); //头像
@@ -146,20 +175,37 @@ pub async fn wxapp_auth(sign: WxSignInVo) -> Result<i64> {
 pub async fn binding_phone(sign: WxSignInVo) -> Result<String> {
     let request_model = get_local().unwrap();
     let config = APPLICATION_CONTEXT.get::<ApplicationConfig>();
-    match get_session_key(config.wxapp().appid(), config.wxapp().secret(), &sign.code().clone().unwrap()).await {
+    match get_session_key(
+        config.wxapp().appid(),
+        config.wxapp().secret(),
+        &sign.code().clone().unwrap(),
+    )
+    .await
+    {
         Ok(data) => {
             let data: WxappSessionKey = serde_json::from_value(data).unwrap();
             //解析用户信息
-            match resolve_data(data.session_key, sign.iv().clone().unwrap(), sign.encryptedData().clone().unwrap()) {
+            match resolve_data(
+                data.session_key,
+                sign.iv().clone().unwrap(),
+                sign.encryptedData().clone().unwrap(),
+            ) {
                 Ok(wx_info) => {
-                    if wx_info.purePhoneNumber.is_none() || wx_info.purePhoneNumber.clone().unwrap().is_empty() {
+                    if wx_info.purePhoneNumber.is_none()
+                        || wx_info.purePhoneNumber.clone().unwrap().is_empty()
+                    {
                         return Err(Error::E("手机号获取失败".to_string()));
                     }
                     //执行更新逻辑
                     let user_service = APPLICATION_CONTEXT.get::<UserService>();
-                    let mut user = user_service.get(request_model.uid().to_string()).await.unwrap();
+                    let mut user = user_service
+                        .get(request_model.uid().to_string())
+                        .await
+                        .unwrap();
                     user.set_phone(wx_info.purePhoneNumber.clone());
-                    user_service.update_by_id(request_model.uid().to_string(), &mut user.into()).await;
+                    user_service
+                        .update_by_id(request_model.uid().to_string(), &mut user.into())
+                        .await;
                     Ok(wx_info.purePhoneNumber.clone().unwrap())
                 }
                 Err(e) => {
@@ -168,7 +214,9 @@ pub async fn binding_phone(sign: WxSignInVo) -> Result<String> {
             }
         }
         Err(e) => {
-            return Err(Error::E("获取session_key失败，请检查您的配置！".to_string()));
+            return Err(Error::E(
+                "获取session_key失败，请检查您的配置！".to_string(),
+            ));
         }
     }
 }

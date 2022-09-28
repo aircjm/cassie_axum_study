@@ -19,7 +19,16 @@ pub struct CasbinRule {
     pub v5: String,
 }
 
-impl_field_name_method!(CasbinRule { id, ptype, v0, v1, v2, v3, v4, v5 });
+impl_field_name_method!(CasbinRule {
+    id,
+    ptype,
+    v0,
+    v1,
+    v2,
+    v3,
+    v4,
+    v5
+});
 #[derive(Debug, Default)]
 pub struct NewCasbinRule<'a> {
     pub ptype: &'a str,

@@ -39,16 +39,27 @@ pub async fn page(arg: Option<Query<AsiQuery>>) -> impl IntoResponse {
         .await;
     RespVO::from_result(&vo).resp_json()
 }
-pub async fn list(Path(group_code): Path<String>, arg: Option<Query<AsiQuery>>) -> impl IntoResponse {
+pub async fn list(
+    Path(group_code): Path<String>,
+    arg: Option<Query<AsiQuery>>,
+) -> impl IntoResponse {
     let asi_service = APPLICATION_CONTEXT.get::<AsiGroupService>();
-    let res = asi_service.asi_column.fetch_list_by_column("group_code", &vec![group_code]).await;
+    let res = asi_service
+        .asi_column
+        .fetch_list_by_column("group_code", &vec![group_code])
+        .await;
     RespVO::from_result(&res).resp_json()
 }
 
-pub async fn save(Path(group_code): Path<String>, Json(dto): Json<AsiGroupColumnDTO>) -> impl IntoResponse {
+pub async fn save(
+    Path(group_code): Path<String>,
+    Json(dto): Json<AsiGroupColumnDTO>,
+) -> impl IntoResponse {
     let asi_service = APPLICATION_CONTEXT.get::<AsiGroupService>();
     /*验证是否存在业务分类*/
-    let group = asi_service.fetch_list_by_column("group_code", &vec![group_code]).await;
+    let group = asi_service
+        .fetch_list_by_column("group_code", &vec![group_code])
+        .await;
     match group {
         Ok(list) => {
             let group_info = list.get(0);
@@ -57,7 +68,10 @@ pub async fn save(Path(group_code): Path<String>, Json(dto): Json<AsiGroupColumn
                 return RespVO::<()>::from_error(&Error::E(e.to_string())).resp_json();
             }
             /*执行保存逻辑*/
-            asi_service.asi_column.save_column(group_info.unwrap().clone(), dto).await;
+            asi_service
+                .asi_column
+                .save_column(group_info.unwrap().clone(), dto)
+                .await;
             RespVO::from_result(&Ok("保存成功".to_string())).resp_json()
         }
         Err(_) => {
@@ -67,6 +81,12 @@ pub async fn save(Path(group_code): Path<String>, Json(dto): Json<AsiGroupColumn
 }
 pub fn init_router() -> Router {
     Router::new()
-        .route("/asi/column/list/:group_code", get(list).post(save).put(save))
-        .route("/asi/column/get_column_one/:id", get(get_column_one).delete(delete))
+        .route(
+            "/asi/column/list/:group_code",
+            get(list).post(save).put(save),
+        )
+        .route(
+            "/asi/column/get_column_one/:id",
+            get(get_column_one).delete(delete),
+        )
 }

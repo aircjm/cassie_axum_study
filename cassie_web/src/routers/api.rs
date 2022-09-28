@@ -11,7 +11,9 @@ pub fn routers() -> Router {
 }
 //需要权限认证的路由
 pub fn need_auth_routers() -> Router {
-    Router::new().merge(user_resources::init_router()).layer(from_extractor::<auth_api::Auth>())
+    Router::new()
+        .merge(user_resources::init_router())
+        .layer(from_extractor::<auth_api::Auth>())
 }
 
 //不需要权限认证的路由

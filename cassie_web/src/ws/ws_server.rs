@@ -16,36 +16,40 @@ use tokio_tungstenite::tungstenite::protocol::Message;
 //核心请求处理
 async fn handle_connection(raw_stream: TcpStream, addr: SocketAddr) {
     //构建权限错误信息
-    let resp = Response::builder().status(StatusCode::UNAUTHORIZED).body(Some("token 不存在".into())).unwrap();
-    let ws_stream = tokio_tungstenite::accept_hdr_async(raw_stream, |req: &Request, response: Response| {
-        //获取url参数
-        match req.uri().query() {
-            //没有参数证明 没权限
-            None => {
-                return Err(resp);
-            }
-            Some(query) => {
-                let t = query.split("=").collect::<Vec<&str>>();
-                //参数错误也返回错误
-                if t.len() < 2 || t.get(0).unwrap().clone() != "access_token" {
+    let resp = Response::builder()
+        .status(StatusCode::UNAUTHORIZED)
+        .body(Some("token 不存在".into()))
+        .unwrap();
+    let ws_stream =
+        tokio_tungstenite::accept_hdr_async(raw_stream, |req: &Request, response: Response| {
+            //获取url参数
+            match req.uri().query() {
+                //没有参数证明 没权限
+                None => {
                     return Err(resp);
                 }
-                let access_token = t.get(1).unwrap();
-                //验证token 是否正确 错误则返回
-                match checked_token(access_token) {
-                    Ok(data) => {
-                        off_line_by_uid(data.id().to_string());
-                        on_line(data, addr);
-                    }
-                    Err(_) => {
+                Some(query) => {
+                    let t = query.split("=").collect::<Vec<&str>>();
+                    //参数错误也返回错误
+                    if t.len() < 2 || t.get(0).unwrap().clone() != "access_token" {
                         return Err(resp);
+                    }
+                    let access_token = t.get(1).unwrap();
+                    //验证token 是否正确 错误则返回
+                    match checked_token(access_token) {
+                        Ok(data) => {
+                            off_line_by_uid(data.id().to_string());
+                            on_line(data, addr);
+                        }
+                        Err(_) => {
+                            return Err(resp);
+                        }
                     }
                 }
             }
-        }
-        Ok(response)
-    })
-    .await;
+            Ok(response)
+        })
+        .await;
 
     match ws_stream {
         Ok(ws_s) => {
@@ -79,7 +83,11 @@ pub async fn init_ws() -> Result<(), IoError> {
     let cassie_config = APPLICATION_CONTEXT.get::<ApplicationConfig>();
     //如果ws端口开启了 则启动 websocket
     if cassie_config.server().ws().is_some() {
-        let addr = format!("{}:{}", cassie_config.server().host(), cassie_config.server().ws().clone().unwrap());
+        let addr = format!(
+            "{}:{}",
+            cassie_config.server().host(),
+            cassie_config.server().ws().clone().unwrap()
+        );
         let try_socket = TcpListener::bind(&addr).await;
         let listener = try_socket.expect("绑定失败");
         info!("WS Listening on: {}", addr);

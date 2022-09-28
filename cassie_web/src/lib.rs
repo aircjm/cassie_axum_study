@@ -82,10 +82,20 @@ pub async fn init_context() {
     //nacos 服务注册
     register_service().await;
     let cassie_config = APPLICATION_CONTEXT.get::<ApplicationConfig>();
-    info!(" - Local:   http://{}:{}", cassie_config.server().host().replace("0.0.0.0", "127.0.0.1"), cassie_config.server().port());
+    info!(
+        " - Local:   http://{}:{}",
+        cassie_config
+            .server()
+            .host()
+            .replace("0.0.0.0", "127.0.0.1"),
+        cassie_config.server().port()
+    );
 }
 
-async fn fire_script_event(params_values: HashMap<String, serde_json::Value>, return_values: serde_json::Value) {
+async fn fire_script_event(
+    params_values: HashMap<String, serde_json::Value>,
+    return_values: serde_json::Value,
+) {
     let request = get_local();
     let cus = CustomEvent {
         params_values: Some(params_values),

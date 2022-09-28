@@ -52,7 +52,11 @@ pub struct OSSConfig {
 }
 impl OSSConfig {
     pub fn validate(&self) {
-        if self.key_id.is_empty() || self.key_secret.is_empty() || self.endpoint.is_empty() || self.bucket.is_empty() {
+        if self.key_id.is_empty()
+            || self.key_secret.is_empty()
+            || self.endpoint.is_empty()
+            || self.bucket.is_empty()
+        {
             panic!("请配置oss ！！！！！！！！！！！！！！！！！！！")
         }
     }
@@ -62,7 +66,9 @@ pub enum UploadType {
     OSS,
 }
 ///服务启动配置
-#[derive(Debug, PartialEq, serde::Serialize, serde::Deserialize, Clone, Getters, Setters, MutGetters)]
+#[derive(
+    Debug, PartialEq, serde::Serialize, serde::Deserialize, Clone, Getters, Setters, MutGetters,
+)]
 #[getset(get_mut = "pub", get = "pub", set = "pub")]
 pub struct ApplicationConfig {
     debug: bool,

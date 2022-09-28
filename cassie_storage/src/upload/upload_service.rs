@@ -40,7 +40,12 @@ impl UploadService {
             }
         }
     }
-    pub async fn upload(&self, data: Bytes, file_name: String, content_type: String) -> Result<String> {
+    pub async fn upload(
+        &self,
+        data: Bytes,
+        file_name: String,
+        content_type: String,
+    ) -> Result<String> {
         self.inner.upload(data, file_name, content_type).await
     }
 }

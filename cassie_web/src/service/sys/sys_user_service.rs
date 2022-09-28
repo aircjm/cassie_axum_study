@@ -1,6 +1,8 @@
 use crate::{middleware::get_local, APPLICATION_CONTEXT};
 use cassie_common::utils::password_encoder::PasswordEncoder;
-use cassie_domain::{dto::sys_user_dto::SysUserDTO, entity::sys_entitys::SysUser, request::SysUserQuery};
+use cassie_domain::{
+    dto::sys_user_dto::SysUserDTO, entity::sys_entitys::SysUser, request::SysUserQuery,
+};
 use rbatis::rbatis::Rbatis;
 use rbatis::wrapper::Wrapper;
 
@@ -31,7 +33,9 @@ impl SysUserService {
     pub async fn delete_user(&self, id: String) {
         let user_info = self.get(id.clone()).await.unwrap();
         self.del(&id).await;
-        self.sys_role_user_service.del_by_column(SysRoleUser::user_id(), id.clone().as_str()).await;
+        self.sys_role_user_service
+            .del_by_column(SysRoleUser::user_id(), id.clone().as_str())
+            .await;
         let cached_enforcer = APPLICATION_CONTEXT.get::<CasbinService>().enforcer.clone();
         let mut lock = cached_enforcer.write().await;
         lock.remove_grouping_policy(vec![id]).await;
@@ -68,7 +72,12 @@ impl SysUserService {
             let cached_enforcer = APPLICATION_CONTEXT.get::<CasbinService>().enforcer.clone();
             let mut lock = cached_enforcer.write().await;
 
-            lock.add_grouping_policy(vec![uid.to_string(), rid.to_string(), request_model.agency_code().clone()]).await;
+            lock.add_grouping_policy(vec![
+                uid.to_string(),
+                rid.to_string(),
+                request_model.agency_code().clone(),
+            ])
+            .await;
             drop(lock);
         }
     }
