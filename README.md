@@ -81,7 +81,7 @@ http://47.104.64.212/#/login
 
 String <348040933@qq.com>
 交流群:435604279
-
+![图片](./wechat.png)
 感谢Ribatis作者
 
 #### 提示
