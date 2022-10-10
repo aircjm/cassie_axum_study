@@ -76,12 +76,18 @@ http://47.104.64.212/#/login
 3. https://axum.rs/
 4. https://github.com/denoland/rusty_v8
 5. https://github.com/denoland/deno
+#### 公众号
+不定期会更新实战视频
+源码分享
+![图片](./wechat.jpg)
 
 #### 参与贡献
 
 String <348040933@qq.com>
 交流群:435604279
-![图片](./wechat.png)
+
+
+
 感谢Ribatis作者
 
 #### 提示
