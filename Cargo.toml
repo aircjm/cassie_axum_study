@@ -12,7 +12,10 @@ members = [
     "cassie_casbin_adapter",
     "cassie_tests",
     "cassie_macros",
-    "cassie_msg"
+    "cassie_msg",
+    "meilisearch-lib",
+    "meilisearch-types",
+    "permissive-json-pointer"
 ]
 exclude = ["cassie_tests","cassie_devtools"]
 [profile.release]
