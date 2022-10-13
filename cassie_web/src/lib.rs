@@ -24,7 +24,6 @@ pub mod service;
 pub mod api;
 pub mod initialize;
 pub mod interceptor;
-pub mod meilisearch;
 pub mod observe;
 pub mod ws;
 

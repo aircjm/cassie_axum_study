@@ -76,7 +76,3 @@ deno_runtime = "0.59.0"
 futures-channel = "0.3.21"
 futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
 tokio-tungstenite = "*"
-
-#meilisearch
-meilisearch-types = { path = "../meilisearch-types" }
-meilisearch-lib = { path = "../meilisearch-lib" }
